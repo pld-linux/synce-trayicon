@@ -1,37 +1,42 @@
 Summary:	SynCE tray icon for GNOME 2
+Summary(pl):	SynCE jako ikona tacki dla ¶rodowiska GNOME 2
 Name:		synce-trayicon
 Version:	0.9.0
 Release:	0.2
 License:	MIT
+Vendor:		The SynCE Project
+Group:		Applications/Communications
 Source0: 	http://dl.sourceforge.net/synce/%{name}-%{version}.tar.gz
 # Source0-md5:	b639e3f681d01d69e6a1c703ab4fc8e8
-Group:		Applications/Communications
-Vendor:		The SynCE Project
 URL:		http://synce.sourceforge.net/
-BuildRequires:	synce-devel = %{version}
 BuildRequires:	gtk+2-devel >= 2.0.0
 BuildRequires:	libgtop-devel >= 1:2.0.0
+BuildRequires:	synce-devel = %{version}
 Requires:	synce
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 synce-trayicon is part of the SynCE project:
-
-  http://synce.sourceforge.net/
+http://synce.sourceforge.net/
 
 This application shows when a device is connected.
+
+%description -l pl
+synce-trayicon to czê¶æ projektu SynCE:
+http://synce.sourceforge.net/ .
+
+Ta aplikacja pokazuje, kiedy urz±dzenie jest pod³±czone.
 
 %prep
 %setup -q 
 
 %build
-#%{__autoconf}
-#%{__autoheader}
-#%{__automake}
 %configure
 %{__make}
 
 %install
+rm -rf $RPM_BUILD_ROOT
+
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
@@ -39,7 +44,6 @@ This application shows when a device is connected.
 
 %clean
 rm -rf $RPM_BUILD_ROOT
-
 
 %files -f %{name}.lang
 %defattr(644,root,root,755)
