@@ -9,7 +9,7 @@ Group:		Applications/Communications
 Source0: 	http://dl.sourceforge.net/synce/%{name}-%{version}.tar.gz
 # Source0-md5:	b639e3f681d01d69e6a1c703ab4fc8e8
 URL:		http://synce.sourceforge.net/
-BuildRequires:	gtk+2-devel >= 2.0.0
+BuildRequires:	gtk+2-devel >= 1:2.0.0
 BuildRequires:	libgtop-devel >= 1:2.0.0
 BuildRequires:	synce-devel = %{version}
 Requires:	synce
