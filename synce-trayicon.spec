@@ -27,7 +27,7 @@ This application shows when a device is connected.
 
 %description -l pl
 synce-trayicon to czê¶æ projektu SynCE:
-http://synce.sourceforge.net/ .
+<http://synce.sourceforge.net/>.
 
 Ta aplikacja pokazuje, kiedy urz±dzenie jest pod³±czone.
 
