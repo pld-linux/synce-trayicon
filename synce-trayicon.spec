@@ -10,8 +10,10 @@ Source0: 	http://dl.sourceforge.net/synce/%{name}-%{version}.tar.gz
 # Source0-md5:	b639e3f681d01d69e6a1c703ab4fc8e8
 URL:		http://synce.sourceforge.net/
 BuildRequires:	automake
+BuildRequires:	gettext-devel
 BuildRequires:	libgnomeui-devel >= 2.0.0
 BuildRequires:	libgtop-devel >= 1:2.0.0
+BuildRequires:	perl-XML-Parser
 BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.213
 BuildRequires:	synce-librapi2-devel >= 0.9.0
