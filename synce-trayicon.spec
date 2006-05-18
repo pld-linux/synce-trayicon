@@ -2,7 +2,7 @@ Summary:	SynCE tray icon for GNOME 2
 Summary(pl):	SynCE jako ikona tacki dla ¶rodowiska GNOME 2
 Name:		synce-trayicon
 Version:	0.9.0
-Release:	5
+Release:	6
 License:	MIT+LGPL
 Vendor:		The SynCE Project
 Group:		Applications/Communications
@@ -19,7 +19,6 @@ BuildRequires:	rpmbuild(macros) >= 1.213
 BuildRequires:	synce-librapi2-devel >= 0.9.0
 Requires:	synce-librapi2 >= 0.9.0
 Requires:	synce-dccm
-ExcludeArch:	%{x8664} alpha ia64 ppc64 s390x sparc64
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
