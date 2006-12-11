@@ -8,7 +8,7 @@ Vendor:		The SynCE Project
 Group:		Applications/Communications
 Source0: 	http://dl.sourceforge.net/synce/%{name}-%{version}.tar.gz
 # Source0-md5:	b639e3f681d01d69e6a1c703ab4fc8e8
-URL:		http://synce.sourceforge.net/
+URL:		http://www.synce.org/
 BuildRequires:	automake
 BuildRequires:	gettext-devel
 BuildRequires:	libgnomeui-devel >= 2.0.0
@@ -23,13 +23,13 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 synce-trayicon is part of the SynCE project:
-http://synce.sourceforge.net/
+<http://www.synce.org/>.
 
 This application shows when a device is connected.
 
 %description -l pl
 synce-trayicon to czê¶æ projektu SynCE:
-<http://synce.sourceforge.net/>.
+<http://www.synce.org/>.
 
 Ta aplikacja pokazuje, kiedy urz±dzenie jest pod³±czone.
 
