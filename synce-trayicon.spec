@@ -1,5 +1,5 @@
 Summary:	SynCE tray icon for GNOME 2
-Summary(pl):	SynCE jako ikona tacki dla ¶rodowiska GNOME 2
+Summary(pl.UTF-8):   SynCE jako ikona tacki dla Å›rodowiska GNOME 2
 Name:		synce-trayicon
 Version:	0.9.0
 Release:	3
@@ -27,11 +27,11 @@ synce-trayicon is part of the SynCE project:
 
 This application shows when a device is connected.
 
-%description -l pl
-synce-trayicon to czê¶æ projektu SynCE:
+%description -l pl.UTF-8
+synce-trayicon to czÄ™Å›Ä‡ projektu SynCE:
 <http://www.synce.org/>.
 
-Ta aplikacja pokazuje, kiedy urz±dzenie jest pod³±czone.
+Ta aplikacja pokazuje, kiedy urzÄ…dzenie jest podÅ‚Ä…czone.
 
 %prep
 %setup -q 
