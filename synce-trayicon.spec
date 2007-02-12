@@ -1,5 +1,5 @@
 Summary:	SynCE tray icon for GNOME 2
-Summary(pl.UTF-8):   SynCE jako ikona tacki dla środowiska GNOME 2
+Summary(pl.UTF-8):	SynCE jako ikona tacki dla środowiska GNOME 2
 Name:		synce-trayicon
 Version:	0.9.0
 Release:	3
