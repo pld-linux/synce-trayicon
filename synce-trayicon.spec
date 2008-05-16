@@ -9,10 +9,12 @@ Group:		Applications/Communications
 Source0: 	http://dl.sourceforge.net/synce/%{name}-%{version}.tar.gz
 # Source0-md5:	dc24b3260d25ace872f1f5f8fab87714
 URL:		http://www.synce.org/
+BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	gettext-devel
 BuildRequires:	libgnomeui-devel >= 2.0.0
 BuildRequires:	libgtop-devel >= 1:2.0.0
+BuildRequires:	libtool
 BuildRequires:	perl-XML-Parser
 BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.213
@@ -56,6 +58,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %find_lang %{name} --with-gnome
 
+rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/modules/*.la
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
 %post
 %gconf_schema_install %{name}.schemas
 %scrollkeeper_update_post
@@ -67,9 +74,6 @@ rm -rf $RPM_BUILD_ROOT
 %preun
 %gconf_schema_uninstall %{name}.schemas
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
 %files -f %{name}.lang
 %defattr(644,root,root,755)
 %doc AUTHORS ChangeLog src/LICENSE*
@@ -80,7 +84,4 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/%{name}
 %attr(755,root,root) %{_libdir}/%{name}/modules/*.so
 %{_iconsdir}/hicolor/*/apps/synce-*.png
-%{_mandir}/man1/%{name}.*
-
-#%files devel
-#%{_libdir}/%{name}/modules/*.la
+%{_mandir}/man1/%{name}.1*
