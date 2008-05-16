@@ -22,7 +22,7 @@ BuildRequires:	synce-librapi2-devel >= %{version}
 BuildRequires:	synce-rra-devel >= %{version}
 %requires_eq_to	synce-librapi2 synce-librapi2-devel
 %requires_eq_to	synce-rra synce-rra-devel
-Requires:	synce-dccm
+Requires:	synce-odccm >= %{version}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -82,6 +82,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/synce/*.glade
 %{_sysconfdir}/gconf/schemas/%{name}.schemas
 %dir %{_libdir}/%{name}
+%dir %{_libdir}/%{name}/modules
 %attr(755,root,root) %{_libdir}/%{name}/modules/*.so
 %{_iconsdir}/hicolor/*/apps/synce-*.png
 %{_mandir}/man1/%{name}.1*
