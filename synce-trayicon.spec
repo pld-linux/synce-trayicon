@@ -1,13 +1,13 @@
 Summary:	SynCE tray icon for GNOME 2
 Summary(pl.UTF-8):	SynCE jako ikona tacki dla środowiska GNOME 2
 Name:		synce-trayicon
-Version:	0.9.0
-Release:	3
+Version:	0.11
+Release:	1
 License:	MIT+LGPL
 Vendor:		The SynCE Project
 Group:		Applications/Communications
 Source0: 	http://dl.sourceforge.net/synce/%{name}-%{version}.tar.gz
-# Source0-md5:	b639e3f681d01d69e6a1c703ab4fc8e8
+# Source0-md5:	dc24b3260d25ace872f1f5f8fab87714
 URL:		http://www.synce.org/
 BuildRequires:	automake
 BuildRequires:	gettext-devel
@@ -16,8 +16,10 @@ BuildRequires:	libgtop-devel >= 1:2.0.0
 BuildRequires:	perl-XML-Parser
 BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.213
-BuildRequires:	synce-librapi2-devel >= 0.9.1
-Requires:	synce-librapi2 >= 0.9.1
+BuildRequires:	synce-librapi2-devel >= %{version}
+BuildRequires:	synce-rra-devel >= %{version}
+%requires_eq_to	synce-librapi2 synce-librapi2-devel
+%requires_eq_to	synce-rra synce-rra-devel
 Requires:	synce-dccm
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -34,11 +36,16 @@ synce-trayicon to część projektu SynCE:
 Ta aplikacja pokazuje, kiedy urządzenie jest podłączone.
 
 %prep
-%setup -q 
+%setup -q
 
 %build
-cp -f /usr/share/automake/config.* .
-%configure
+%{__libtoolize}
+%{__aclocal}
+%{__autoconf}
+%{__autoheader}
+%{__automake}
+%configure \
+	--disable-schemas-install
 %{__make}
 
 %install
@@ -49,6 +56,17 @@ rm -rf $RPM_BUILD_ROOT
 
 %find_lang %{name} --with-gnome
 
+%post
+%gconf_schema_install %{name}.schemas
+%scrollkeeper_update_post
+%update_desktop_database_post
+
+%postun
+%scrollkeeper_update_postun
+
+%preun
+%gconf_schema_uninstall %{name}.schemas
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -56,9 +74,13 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %doc AUTHORS ChangeLog src/LICENSE*
 %attr(755,root,root) %{_bindir}/*
-# dir shared with synce-gnomevfs
-%dir %{_pixmapsdir}/synce
-%{_pixmapsdir}/synce/*.png
-# dir shared with synce-rra, synce-gnomevfs, synce-software-manager
 %dir %{_datadir}/synce
 %{_datadir}/synce/*.glade
+%{_sysconfdir}/gconf/schemas/%{name}.schemas
+%dir %{_libdir}/%{name}
+%attr(755,root,root) %{_libdir}/%{name}/modules/*.so
+%{_iconsdir}/hicolor/*/apps/synce-*.png
+%{_mandir}/man1/%{name}.*
+
+#%files devel
+#%{_libdir}/%{name}/modules/*.la
