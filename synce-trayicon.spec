@@ -1,24 +1,26 @@
 Summary:	SynCE tray icon for GNOME 2
 Summary(pl.UTF-8):	SynCE jako ikona tacki dla środowiska GNOME 2
 Name:		synce-trayicon
-Version:	0.11
+Version:	0.12
 Release:	1
 License:	MIT+LGPL
 Vendor:		The SynCE Project
 Group:		Applications/Communications
 Source0: 	http://dl.sourceforge.net/synce/%{name}-%{version}.tar.gz
-# Source0-md5:	dc24b3260d25ace872f1f5f8fab87714
+# Source0-md5:	46da7e0de59645a4272a106f718a0f0a
 URL:		http://www.synce.org/
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	gettext-devel
 BuildRequires:	libgnomeui-devel >= 2.0.0
 BuildRequires:	libgtop-devel >= 1:2.0.0
+BuildRequires:	libnotify-devel
 BuildRequires:	libtool
 BuildRequires:	perl-XML-Parser
 BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.213
 BuildRequires:	synce-librapi2-devel >= %{version}
+BuildRequires:	synce-orange-libs-devel >= 0.3.2
 BuildRequires:	synce-rra-devel >= %{version}
 %requires_eq_to	synce-librapi2 synce-librapi2-devel
 %requires_eq_to	synce-rra synce-rra-devel
