@@ -1,13 +1,13 @@
 Summary:	SynCE tray icon for GNOME 2
 Summary(pl.UTF-8):	SynCE jako ikona tacki dla środowiska GNOME 2
 Name:		synce-trayicon
-Version:	0.12
-Release:	2
+Version:	0.15
+Release:	1
 License:	MIT+LGPL
 Vendor:		The SynCE Project
 Group:		Applications/Communications
 Source0: 	http://dl.sourceforge.net/synce/%{name}-%{version}.tar.gz
-# Source0-md5:	46da7e0de59645a4272a106f718a0f0a
+# Source0-md5:	a37ea06e7ea3470097836c6ab9f6c1c9
 URL:		http://www.synce.org/
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -22,7 +22,7 @@ BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.213
 BuildRequires:	synce-librapi2-devel >= %{version}
 BuildRequires:	synce-orange-libs-devel >= 0.3.2
-BuildRequires:	synce-rra-devel >= %{version}
+BuildRequires:	synce-rra-devel >= 0.14
 %requires_eq_to	synce-librapi2 synce-librapi2-devel
 %requires_eq_to	synce-rra synce-rra-devel
 Requires:	synce-connector
@@ -45,7 +45,7 @@ Ta aplikacja pokazuje, kiedy urządzenie jest podłączone.
 
 %build
 %{__libtoolize}
-%{__aclocal}
+%{__aclocal} -I m4
 %{__autoconf}
 %{__autoheader}
 %{__automake}
@@ -79,7 +79,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f %{name}.lang
 %defattr(644,root,root,755)
-%doc AUTHORS ChangeLog src/LICENSE*
+%doc AUTHORS ChangeLog README
 %attr(755,root,root) %{_bindir}/*
 %dir %{_datadir}/synce
 %{_datadir}/synce/*.glade
@@ -89,3 +89,5 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/%{name}/modules/*.so
 %{_iconsdir}/hicolor/*/apps/synce-*.png
 %{_mandir}/man1/%{name}.1*
+%{_desktopdir}/%{name}.desktop
+%{_datadir}/gnome/autostart/%{name}-autostart.desktop
