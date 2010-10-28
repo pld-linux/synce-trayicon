@@ -2,11 +2,10 @@ Summary:	SynCE tray icon for GNOME 2
 Summary(pl.UTF-8):	SynCE jako ikona tacki dla środowiska GNOME 2
 Name:		synce-trayicon
 Version:	0.15
-Release:	1
+Release:	2
 License:	MIT+LGPL
-Vendor:		The SynCE Project
 Group:		Applications/Communications
-Source0: 	http://dl.sourceforge.net/synce/%{name}-%{version}.tar.gz
+Source0:	http://downloads.sourceforge.net/synce/%{name}-%{version}.tar.gz
 # Source0-md5:	a37ea06e7ea3470097836c6ab9f6c1c9
 URL:		http://www.synce.org/
 BuildRequires:	autoconf
@@ -21,7 +20,7 @@ BuildRequires:	perl-XML-Parser
 BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.213
 BuildRequires:	synce-librapi2-devel >= %{version}
-BuildRequires:	synce-orange-libs-devel >= 0.3.2
+BuildRequires:	synce-orange-libs-devel >= 0.4-3
 BuildRequires:	synce-rra-devel >= 0.14
 %requires_eq_to	synce-librapi2 synce-librapi2-devel
 %requires_eq_to	synce-rra synce-rra-devel
@@ -29,14 +28,12 @@ Requires:	synce-connector
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
-synce-trayicon is part of the SynCE project:
-<http://www.synce.org/>.
+synce-trayicon is part of the SynCE project: <http://www.synce.org/>.
 
 This application shows when a device is connected.
 
 %description -l pl.UTF-8
-synce-trayicon to część projektu SynCE:
-<http://www.synce.org/>.
+synce-trayicon to część projektu SynCE: <http://www.synce.org/>.
 
 Ta aplikacja pokazuje, kiedy urządzenie jest podłączone.
 
@@ -62,6 +59,9 @@ rm -rf $RPM_BUILD_ROOT
 %find_lang %{name} --with-gnome
 
 rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/modules/*.la
+
+install -d $RPM_BUILD_ROOT/etc/xdg/autostart
+mv $RPM_BUILD_ROOT{%{_datadir}/gnome/autostart,/etc/xdg/autostart}/%{name}-autostart.desktop
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -90,4 +90,4 @@ rm -rf $RPM_BUILD_ROOT
 %{_iconsdir}/hicolor/*/apps/synce-*.png
 %{_mandir}/man1/%{name}.1*
 %{_desktopdir}/%{name}.desktop
-%{_datadir}/gnome/autostart/%{name}-autostart.desktop
+/etc/xdg/autostart/%{name}-autostart.desktop
