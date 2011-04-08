@@ -7,6 +7,7 @@ License:	MIT+LGPL
 Group:		Applications/Communications
 Source0:	http://downloads.sourceforge.net/synce/%{name}-%{version}.tar.gz
 # Source0-md5:	a37ea06e7ea3470097836c6ab9f6c1c9
+Patch0:		%{name}-libnotify.patch
 URL:		http://www.synce.org/
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -15,7 +16,7 @@ BuildRequires:	hal-devel
 BuildRequires:	intltool
 BuildRequires:	libgnomeui-devel >= 2.0.0
 BuildRequires:	libgtop-devel >= 1:2.0.0
-BuildRequires:	libnotify-devel
+BuildRequires:	libnotify-devel >= 0.7
 BuildRequires:	libtool
 BuildRequires:	perl-XML-Parser
 BuildRequires:	pkgconfig
@@ -40,6 +41,7 @@ Ta aplikacja pokazuje, kiedy urządzenie jest podłączone.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 %{__libtoolize}
