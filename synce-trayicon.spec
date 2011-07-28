@@ -2,7 +2,7 @@ Summary:	SynCE tray icon for GNOME 2
 Summary(pl.UTF-8):	SynCE jako ikona tacki dla środowiska GNOME 2
 Name:		synce-trayicon
 Version:	0.15.1
-Release:	1
+Release:	2
 License:	MIT+LGPL
 Group:		Applications/Communications
 Source0:	http://downloads.sourceforge.net/synce/%{name}-%{version}.tar.gz
@@ -42,7 +42,7 @@ Ta aplikacja pokazuje, kiedy urządzenie jest podłączone.
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p1
+%patch1 -p2
 
 %build
 %{__libtoolize}

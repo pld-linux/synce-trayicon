@@ -9,8 +9,8 @@
  2011-02-12  Mark Ellis  <mark@mpellis.org.uk>
  
  	* 0.15.1 release
---- trunk/trayicon/configure.ac.in	2011/02/27 10:27:49	3972
-+++ trunk/trayicon/configure.ac.in	2011/03/03 17:18:50	3973
+--- trunk/trayicon/configure.ac	2011/02/27 10:27:49	3972
++++ trunk/trayicon/configure.ac	2011/03/03 17:18:50	3973
 @@ -21,13 +21,12 @@
  dnl Check for librra
  PKG_CHECK_MODULES(LIBRRA, librra >= 0.14)
