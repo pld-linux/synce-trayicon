@@ -1,18 +1,18 @@
 Summary:	SynCE tray icon for GNOME 2
 Summary(pl.UTF-8):	SynCE jako ikona tacki dla środowiska GNOME 2
 Name:		synce-trayicon
-Version:	0.15
-Release:	4
+Version:	0.15.1
+Release:	1
 License:	MIT+LGPL
 Group:		Applications/Communications
 Source0:	http://downloads.sourceforge.net/synce/%{name}-%{version}.tar.gz
-# Source0-md5:	a37ea06e7ea3470097836c6ab9f6c1c9
+# Source0-md5:	b6ab20a0a4814817b486585b6b63130e
 Patch0:		%{name}-libnotify.patch
+Patch1:		%{name}-backends.patch
 URL:		http://www.synce.org/
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	gettext-devel
-BuildRequires:	hal-devel
 BuildRequires:	intltool
 BuildRequires:	libgnomeui-devel >= 2.0.0
 BuildRequires:	libgtop-devel >= 1:2.0.0
@@ -42,6 +42,7 @@ Ta aplikacja pokazuje, kiedy urządzenie jest podłączone.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p1
 
 %build
 %{__libtoolize}
@@ -50,7 +51,12 @@ Ta aplikacja pokazuje, kiedy urządzenie jest podłączone.
 %{__autoheader}
 %{__automake}
 %configure \
-	--disable-schemas-install
+	--disable-schemas-install \
+	--enable-vdccm-support \
+	--enable-odccm-support \
+	--disable-hal-support \
+	--enable-udev-support
+
 %{__make}
 
 %install

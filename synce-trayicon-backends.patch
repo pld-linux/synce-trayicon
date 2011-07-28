@@ -1,0 +1,736 @@
+--- trunk/trayicon/ChangeLog	2011/02/27 10:27:49	3972
++++ trunk/trayicon/ChangeLog	2011/03/03 17:18:50	3973
+@@ -1,3 +1,8 @@
++2011-03-01  Mark Ellis  <mark@mpellis.org.uk>
++
++	* add configure options to allow disabling of dccm backends;
++	  only udev based backend is enabled by default
++
+ 2011-02-12  Mark Ellis  <mark@mpellis.org.uk>
+ 
+ 	* 0.15.1 release
+--- trunk/trayicon/configure.ac.in	2011/02/27 10:27:49	3972
++++ trunk/trayicon/configure.ac.in	2011/03/03 17:18:50	3973
+@@ -21,13 +21,12 @@
+ dnl Check for librra
+ PKG_CHECK_MODULES(LIBRRA, librra >= 0.14)
+ 
+-PKG_CHECK_MODULES(GNOME2, 
+-				  glib-2.0       \
+-				  gmodule-2.0    \
+-				  gtk+-2.0 >= 2.12 \
+-				  libgnome-2.0   \
+-				  libgnomeui-2.0 \ 
+-				  libgtop-2.0)
++PKG_CHECK_MODULES(GNOME2, glib-2.0       \
++			  gmodule-2.0    \
++			  gtk+-2.0 >= 2.12 \
++			  libgnome-2.0   \
++			  libgnomeui-2.0)
++
+ AC_SUBST(GNOME2_CFLAGS)
+ AC_SUBST(GNOME2_LIBS)
+ 
+@@ -38,9 +37,6 @@
+ PKG_CHECK_MODULES(DBUS, [dbus-1 >= 0.61, dbus-glib-1 >= 0.61],
+                     dbus=yes, dbus=no)
+ 
+-dnl Check for Hal
+-PKG_CHECK_MODULES(HAL, hal)
+-
+ dnl Check for Gnome Keyring
+ PKG_CHECK_MODULES(GNOME_KEYRING, gnome-keyring-1)
+ AC_SUBST(GNOME_KEYRING_CFLAGS)
+@@ -56,6 +52,105 @@
+ AC_SUBST(XML_CFLAGS)
+ AC_SUBST(XML_LIBS)
+ 
++
++dnl
++dnl whether (v)dccm connection file support is required
++dnl
++AC_ARG_ENABLE(vdccm-support,
++              [  --enable-vdccm-support  enable vdccm support],
++              enable_vdccm_support=$enableval, enable_vdccm_support=no)
++
++if ! test "$enable_vdccm_support" = "no"; then
++  dnl Check for gtop
++  PKG_CHECK_MODULES(GTOP, libgtop-2.0, gtop_found=yes, gtop_found=no)
++
++  if test "$gtop_found" = "no"; then
++    if test "$enable_vdccm_support" = "auto"; then
++      AC_MSG_NOTICE([libgtop not found, building without vdccm support])
++      enable_vdccm_support=no
++    else
++      AC_MSG_ERROR([vdccm support requested but libgtop could not be found])
++    fi
++  else
++    AC_MSG_NOTICE([Building with vdccm support])
++    AC_DEFINE(ENABLE_VDCCM_SUPPORT, 1, [Define if building with vdccm support])
++    enable_vdccm_support=yes
++  fi
++else
++  AC_MSG_NOTICE([Building without vdccm support])
++fi
++if test "$enable_vdccm_support" = "yes"; then vdccm=1; else vdccm=0; fi
++AC_DEFINE_UNQUOTED(ENABLE_VDCCM_SUPPORT, $vdccm, [Define to 1 if you want vdccm support.])
++AM_CONDITIONAL(ENABLE_VDCCM_SUPPORT, test "x$enable_vdccm_support" = "xyes")
++
++dnl
++dnl whether odccm dbus support is required
++dnl
++AC_ARG_ENABLE(odccm-support,
++              [  --enable-odccm-support  enable odccm support (requires D-Bus)],
++              enable_odccm_support=$enableval, enable_odccm_support=no)
++
++if ! test "$enable_odccm_support" = "no"; then
++  AC_MSG_NOTICE([Building with odccm support])
++  AC_DEFINE(ENABLE_ODCCM_SUPPORT, 1, [Define if building with odccm support])
++  enable_odccm_support=yes
++else
++  AC_MSG_NOTICE([Building without odccm support])
++fi
++if test "$enable_odccm_support" = "yes"; then odccm=1; else odccm=0; fi
++AC_DEFINE_UNQUOTED(ENABLE_ODCCM_SUPPORT, $odccm, [Define to 1 if you want odccm support.])
++AM_CONDITIONAL(ENABLE_ODCCM_SUPPORT, test "x$enable_odccm_support" = "xyes")
++
++dnl
++dnl whether hal dbus support is required
++dnl
++AC_ARG_ENABLE(hal-support,
++              [  --enable-hal-support  enable hal support (requires D-Bus)],
++              enable_hal_support=$enableval, enable_hal_support=no)
++
++if ! test "$enable_hal_support" = "no"; then
++  dnl Check for Hal
++  PKG_CHECK_MODULES(HAL, hal, hal_found=yes, hal_found=no)
++
++  if test "$hal_found" = "no"; then
++    if test "$enable_hal_support" = "auto"; then
++      AC_MSG_NOTICE([Hal not found, building without hal support])
++      enable_hal_support=no
++    else
++      AC_MSG_ERROR([Hal support requested but hal could not be found])
++    fi
++  else
++    AC_MSG_NOTICE([Building with hal support])
++    AC_DEFINE(ENABLE_HAL_SUPPORT, 1, [Define if building with hal support])
++    enable_hal_support=yes
++  fi
++else
++  AC_MSG_NOTICE([Building without hal support])
++fi
++
++if test "$enable_hal_support" = "yes"; then hal=1; else hal=0; fi
++AC_DEFINE_UNQUOTED(ENABLE_HAL_SUPPORT, $hal, [Define to 1 if you want hal support.])
++AM_CONDITIONAL(ENABLE_HAL_SUPPORT, test "x$enable_hal_support" = "xyes")
++
++dnl
++dnl whether dbus support for udev is required
++dnl
++AC_ARG_ENABLE(udev-support,
++              [  --enable-udev-support  enable udev support (requires D-Bus)],
++              enable_udev_support=$enableval, enable_udev_support=yes)
++
++if ! test "$enable_udev_support" = "no"; then
++  AC_MSG_NOTICE([Building with udev support])
++  AC_DEFINE(ENABLE_UDEV_SUPPORT, 1, [Define if building with udev support])
++  enable_udev_support=yes
++else
++  AC_MSG_NOTICE([Building without udev support])
++fi
++if test "$enable_udev_support" = "yes"; then udev=1; else udev=0; fi
++AC_DEFINE_UNQUOTED(ENABLE_UDEV_SUPPORT, $udev, [Define to 1 if you want udev support.])
++AM_CONDITIONAL(ENABLE_UDEV_SUPPORT, test "x$enable_udev_support" = "xyes")
++
++
+ dnl Checks for header files.
+ 
+ dnl Checks for typedefs, structures, and compiler characteristics.
+--- trunk/trayicon/data/synce_trayicon_properties.glade	2011/02/27 10:27:49	3972
++++ trunk/trayicon/data/synce_trayicon_properties.glade	2011/03/03 17:18:50	3973
+@@ -1,14 +1,13 @@
+-<?xml version="1.0"?>
++<?xml version="1.0" encoding="UTF-8"?>
+ <interface>
+   <!-- interface-requires gtk+ 2.12 -->
+   <!-- interface-naming-policy toplevel-contextual -->
+-  <object class="GtkDialog" id="prefs_window">
++  <object class="GtkDialog" id="prefs_window_vdccm">
+     <property name="visible">True</property>
+     <property name="border_width">6</property>
+     <property name="title" translatable="yes">SynCE Trayicon Preferences</property>
+     <property name="resizable">False</property>
+     <property name="type_hint">dialog</property>
+-    <property name="has_separator">False</property>
+     <child internal-child="vbox">
+       <object class="GtkVBox" id="dialog-vbox1">
+         <property name="visible">True</property>
+@@ -1326,7 +1325,6 @@
+     <property name="title" translatable="yes">Create Partnership</property>
+     <property name="window_position">center-on-parent</property>
+     <property name="type_hint">dialog</property>
+-    <property name="has_separator">False</property>
+     <child internal-child="vbox">
+       <object class="GtkVBox" id="dialog-vbox4">
+         <property name="visible">True</property>
+@@ -1461,4 +1459,58 @@
+       <action-widget response="-5">button2</action-widget>
+     </action-widgets>
+   </object>
++  <object class="GtkDialog" id="prefs_window">
++    <property name="visible">True</property>
++    <property name="border_width">6</property>
++    <property name="title" translatable="yes">SynCE Trayicon Preferences</property>
++    <property name="resizable">False</property>
++    <property name="type_hint">dialog</property>
++    <child internal-child="vbox">
++      <object class="GtkVBox" id="dialog-vbox6">
++        <property name="visible">True</property>
++        <property name="spacing">9</property>
++        <child>
++          <object class="GtkCheckButton" id="prefs_show_disconnected">
++            <property name="label" translatable="yes">Show icon when disconnected</property>
++            <property name="visible">True</property>
++            <property name="can_focus">True</property>
++            <property name="receives_default">False</property>
++            <property name="draw_indicator">True</property>
++          </object>
++          <packing>
++            <property name="position">1</property>
++          </packing>
++        </child>
++        <child internal-child="action_area">
++          <object class="GtkHButtonBox" id="dialog-action_area6">
++            <property name="visible">True</property>
++            <property name="layout_style">end</property>
++            <child>
++              <object class="GtkButton" id="prefs_closebutton">
++                <property name="label">gtk-close</property>
++                <property name="visible">True</property>
++                <property name="can_focus">True</property>
++                <property name="can_default">True</property>
++                <property name="receives_default">True</property>
++                <property name="use_stock">True</property>
++              </object>
++              <packing>
++                <property name="expand">False</property>
++                <property name="fill">False</property>
++                <property name="position">0</property>
++              </packing>
++            </child>
++          </object>
++          <packing>
++            <property name="expand">False</property>
++            <property name="pack_type">end</property>
++            <property name="position">0</property>
++          </packing>
++        </child>
++      </object>
++    </child>
++    <action-widgets>
++      <action-widget response="-7">prefs_closebutton</action-widget>
++    </action-widgets>
++  </object>
+ </interface>
+--- trunk/trayicon/src/Makefile.am	2011/02/27 10:27:49	3972
++++ trunk/trayicon/src/Makefile.am	2011/03/03 17:18:50	3973
+@@ -20,21 +20,33 @@
+ 			main.c \
+ 			stock-icons.h \
+ 			synce-trayicon.c synce-trayicon.h \
+-			gtop_stuff.c gtop_stuff.h \
+ 			properties.c properties.h \
+ 			utils.c utils.h  \
+ 			device.c device.h \
+ 			device-manager.c device-manager.h \
+-			udev-client.c udev-client.h \
+-			hal-client.c hal-client.h \
+-			vdccm-client.c vdccm-client.h \
+-			odccm-client.c odccm-client.h \
+ 			dccm-client.c dccm-client.h \
+ 			keyring.c keyring.h \
+ 			device-info.c device-info.h \
+ 			module.c module.h \
+ 			synce_app_man.c synce_app_man.h
+ 
++if ENABLE_VDCCM_SUPPORT
++synce_trayicon_SOURCES += vdccm-client.c vdccm-client.h \
++			gtop_stuff.c gtop_stuff.h
++endif
++
++if ENABLE_ODCCM_SUPPORT
++synce_trayicon_SOURCES += odccm-client.c odccm-client.h
++endif
++
++if ENABLE_HAL_SUPPORT
++synce_trayicon_SOURCES += hal-client.c hal-client.h
++endif
++
++if ENABLE_UDEV_SUPPORT
++synce_trayicon_SOURCES += udev-client.c udev-client.h
++endif
++
+ EXTRA_DIST = dccm-client-signals-marshal.list \
+ 		sync-engine.xml
+ 
+@@ -45,6 +57,7 @@
+ 	$(LIBRRA_CFLAGS) \
+ 	$(DBUS_CFLAGS) \
+ 	$(HAL_CFLAGS) \
++	$(GTOP_CFLAGS) \
+ 	$(LIBORANGE_CFLAGS) \
+ 	$(NOTIFY_CFLAGS) \
+ 	$(XML_CFLAGS)
+@@ -56,6 +69,7 @@
+ 	$(LIBRRA_LIBS) \
+ 	$(DBUS_LIBS) \
+ 	$(HAL_LIBS) \
++	$(GTOP_LIBS) \
+ 	$(LIBORANGE_LIBS) \
+ 	$(NOTIFY_LIBS) \
+ 	$(XML_LIBS)
+--- trunk/trayicon/src/hal-client.c	2011/02/27 10:27:49	3972
++++ trunk/trayicon/src/hal-client.c	2011/03/03 17:18:50	3973
+@@ -606,7 +606,7 @@
+         if (strcmp(name, HAL_SERVICE) != 0)
+                 return;
+ 
+-        /* If this parameter is empty, odccm just came online */
++        /* If this parameter is empty, hal just came online */
+ 
+         if (strcmp(old_owner, "") == 0) {
+                 priv->online = TRUE;
+@@ -617,7 +617,7 @@
+                 return;
+         }
+ 
+-        /* If this parameter is empty, odccm just went offline */
++        /* If this parameter is empty, hal just went offline */
+ 
+         if (strcmp(new_owner, "") == 0) {
+                 priv->online = FALSE;
+--- trunk/trayicon/src/properties.c	2011/02/27 10:27:49	3972
++++ trunk/trayicon/src/properties.c	2011/03/03 17:18:50	3973
+@@ -18,6 +18,7 @@
+   key = gconf_entry_get_key(entry);
+   value = gconf_entry_get_value(entry);
+ 
++#if ENABLE_VDCCM_SUPPORT
+   if (!(g_ascii_strcasecmp(key, "/apps/synce/trayicon/enable_vdccm"))) {
+     gboolean enable_vdccm = gconf_value_get_bool(value);
+     GtkWidget *prefs_enable_vdccm = GTK_WIDGET(gtk_builder_get_object(builder, "prefs_enable_vdccm"));
+@@ -35,6 +36,7 @@
+ 
+     return;
+   }
++#endif
+ 
+   if (!(g_ascii_strcasecmp(key, "/apps/synce/trayicon/show_disconnected"))) {
+     gboolean show_disconnected = gconf_value_get_bool(value);
+@@ -46,7 +48,7 @@
+   }
+ }
+ 
+-
++#if ENABLE_VDCCM_SUPPORT
+ static void
+ prefs_enable_vdccm_toggled_cb (GtkWidget *widget, gpointer data)
+ {
+@@ -85,7 +87,7 @@
+ 
+         g_object_unref(conf_client);
+ }
+-
++#endif
+ 
+ static void
+ prefs_show_disconnected_toggled_cb (GtkWidget *widget, gpointer data)
+@@ -126,8 +128,15 @@
+ GtkWidget *
+ run_prefs_dialog (SynceTrayIcon *trayicon)
+ {
+-  GtkWidget *prefs_window, *prefs_enable_vdccm, *prefs_start_stop_vdccm, *prefs_show_disconnected, *close_button;
+-  gboolean enable_vdccm, start_stop_vdccm, show_disconnected;
++  GtkWidget *prefs_window, *prefs_show_disconnected, *close_button;
++  gboolean show_disconnected;
++#if ENABLE_VDCCM_SUPPORT
++  GtkWidget *prefs_enable_vdccm, *prefs_start_stop_vdccm;
++  gboolean enable_vdccm, start_stop_vdccm;
++  gchar *prefs_window_name = "prefs_window_vdccm";
++#else
++  gchar *prefs_window_name = "prefs_window";
++#endif
+   GError *error = NULL;
+ 
+   GConfClient *conf_client = gconf_client_get_default();
+@@ -135,7 +144,7 @@
+   builder = gtk_builder_new();
+   guint builder_res;
+ #if GTK_CHECK_VERSION(2,14,0)
+-  gchar *namelist[] = { "prefs_window", NULL };
++  gchar *namelist[] = { prefs_window_name, NULL };
+ 
+   builder_res = gtk_builder_add_objects_from_file(builder,
+                                                   SYNCE_DATA "synce_trayicon_properties.glade",
+@@ -152,10 +161,13 @@
+           error = NULL;
+   }
+ 
+-  prefs_window = GTK_WIDGET(gtk_builder_get_object(builder, "prefs_window"));
++  prefs_window = GTK_WIDGET(gtk_builder_get_object(builder, prefs_window_name));
++  prefs_show_disconnected = GTK_WIDGET(gtk_builder_get_object(builder, "prefs_show_disconnected"));
++  close_button = GTK_WIDGET(gtk_builder_get_object(builder, "prefs_closebutton"));
++
++#if ENABLE_VDCCM_SUPPORT
+   prefs_enable_vdccm = GTK_WIDGET(gtk_builder_get_object(builder, "prefs_enable_vdccm"));
+   prefs_start_stop_vdccm = GTK_WIDGET(gtk_builder_get_object(builder, "prefs_start_stop_vdccm"));
+-  prefs_show_disconnected = GTK_WIDGET(gtk_builder_get_object(builder, "prefs_show_disconnected"));
+ 
+   enable_vdccm = gconf_client_get_bool (conf_client, "/apps/synce/trayicon/enable_vdccm", &error);
+   if (error) {
+@@ -176,6 +188,12 @@
+           gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (prefs_start_stop_vdccm), start_stop_vdccm);
+   }
+ 
++  g_signal_connect (G_OBJECT (prefs_enable_vdccm), "toggled",
++		      G_CALLBACK (prefs_enable_vdccm_toggled_cb), prefs_start_stop_vdccm);
++  g_signal_connect (G_OBJECT (prefs_start_stop_vdccm), "toggled",
++		      G_CALLBACK (prefs_start_stop_vdccm_toggled_cb), NULL);
++#endif
++
+   show_disconnected = gconf_client_get_bool (conf_client, "/apps/synce/trayicon/show_disconnected", &error);
+   if (error) {
+           g_warning("%s: Getting '/apps/synce/trayicon/show_disconnected' from gconf failed: %s", G_STRFUNC, error->message);
+@@ -184,10 +202,6 @@
+   }
+   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (prefs_show_disconnected), show_disconnected);
+ 
+-  g_signal_connect (G_OBJECT (prefs_enable_vdccm), "toggled",
+-		      G_CALLBACK (prefs_enable_vdccm_toggled_cb), prefs_start_stop_vdccm);
+-  g_signal_connect (G_OBJECT (prefs_start_stop_vdccm), "toggled",
+-		      G_CALLBACK (prefs_start_stop_vdccm_toggled_cb), NULL);
+   g_signal_connect (G_OBJECT (prefs_show_disconnected), "toggled",
+ 		      G_CALLBACK (prefs_show_disconnected_toggled_cb), NULL);
+ 
+@@ -200,7 +214,6 @@
+           error = NULL;
+   }                  
+ 
+-  close_button = GTK_WIDGET(gtk_builder_get_object(builder, "prefs_closebutton"));
+   g_signal_connect (G_OBJECT (close_button), "clicked",
+ 		    G_CALLBACK (prefs_close_button_clicked_cb), NULL);
+ 
+--- trunk/trayicon/src/synce-trayicon.c	2011/02/27 10:27:49	3972
++++ trunk/trayicon/src/synce-trayicon.c	2011/03/03 17:18:50	3973
+@@ -37,15 +37,23 @@
+ #include <libnotify/notify.h>
+ 
+ #include "synce-trayicon.h"
+-#include "gtop_stuff.h"
+ #include "properties.h"
+ #include "utils.h"
+ #include "keyring.h"
+ #include "dccm-client.h"
++#if ENABLE_VDCCM_SUPPORT
++#include "gtop_stuff.h"
+ #include "vdccm-client.h"
++#endif
++#if ENABLE_ODCCM_SUPPORT
+ #include "odccm-client.h"
++#endif
++#if ENABLE_HAL_SUPPORT
+ #include "hal-client.h"
++#endif
++#if ENABLE_UDEV_SUPPORT
+ #include "udev-client.h"
++#endif
+ #include "device-manager.h"
+ #include "stock-icons.h"
+ #include "device-info.h"
+@@ -58,10 +66,18 @@
+ 
+   GConfClient *conf_client;
+   guint conf_watch_id;
++#if ENABLE_UDEV_SUPPORT
+   DccmClient *udev_client;
++#endif
++#if ENABLE_HAL_SUPPORT
+   DccmClient *hal_client;
++#endif
++#if ENABLE_ODCCM_SUPPORT
+   DccmClient *odccm_client;
++#endif
++#if ENABLE_VDCCM_SUPPORT
+   DccmClient *vdccm_client;
++#endif
+   WmDeviceManager *device_list;
+   GtkWidget *menu;
+   NotifyNotification *notification;
+@@ -357,14 +373,22 @@
+ 
+         g_object_get(device, "dccm-type", &dccm_type, NULL);
+ 
++#if ENABLE_UDEV_SUPPORT
+         if (!(g_ascii_strcasecmp(dccm_type, "udev")))
+                 dccm_client_provide_password(priv->udev_client, pdaname, password);
+-        else if (!(g_ascii_strcasecmp(dccm_type, "hal")))
++#endif
++#if ENABLE_HAL_SUPPORT
++        if (!(g_ascii_strcasecmp(dccm_type, "hal")))
+                 dccm_client_provide_password(priv->hal_client, pdaname, password);
+-        else if (!(g_ascii_strcasecmp(dccm_type, "odccm")))
++#endif
++#if ENABLE_ODCCM_SUPPORT
++        if (!(g_ascii_strcasecmp(dccm_type, "odccm")))
+                 dccm_client_provide_password(priv->odccm_client, pdaname, password);
+-        else
++#endif
++#if ENABLE_VDCCM_SUPPORT
++        if (!(g_ascii_strcasecmp(dccm_type, "vdccm")))
+                 dccm_client_provide_password(priv->vdccm_client, pdaname, password);
++#endif
+ 
+         g_free(pdaname);
+         g_free(password);
+@@ -455,7 +479,7 @@
+   return;
+ }
+ 
+-
++#if ENABLE_VDCCM_SUPPORT
+ static void
+ stop_dccm ()
+ {
+@@ -501,31 +525,40 @@
+ 
+         return;
+ }
++#endif
+ 
+ static void
+ service_starting_cb(DccmClient *comms_client, gpointer user_data)
+ {
+   SynceTrayIcon *self = SYNCE_TRAYICON(user_data);
+ 
++#if ENABLE_UDEV_SUPPORT
+   if (IS_UDEV_CLIENT(comms_client)) {
+           event_notification(self, "Service starting", "Udev DCCM has signalled that it is starting");
+           return;
+   }
++#endif
+ 
++#if ENABLE_HAL_SUPPORT
+   if (IS_HAL_CLIENT(comms_client)) {
+           event_notification(self, "Service starting", "Hal has signalled that it is starting");
+           return;
+   }
++#endif
+ 
++#if ENABLE_ODCCM_SUPPORT
+   if (IS_ODCCM_CLIENT(comms_client)) {
+           event_notification(self, "Service starting", "Odccm has signalled that it is starting");
+           return;
+   }
++#endif
+ 
++#if ENABLE_VDCCM_SUPPORT
+   if (IS_VDCCM_CLIENT(comms_client)) {
+           event_notification(self, "Service starting", "Vdccm has signalled that it is starting");
+           return;
+   }
++#endif
+ }
+ 
+ 
+@@ -535,29 +568,37 @@
+   SynceTrayIcon *self = SYNCE_TRAYICON(user_data);
+   SynceTrayIconPrivate *priv = SYNCE_TRAYICON_GET_PRIVATE (self);
+ 
++#if ENABLE_UDEV_SUPPORT
+   if (IS_UDEV_CLIENT(comms_client)) {
+           event_notification(self, "Service stopping", "Udev DCCM has signalled that it is stopping");
+           wm_device_manager_remove_by_prop(priv->device_list, "dccm-type", "udev");
+           return;
+   }
++#endif
+ 
++#if ENABLE_HAL_SUPPORT
+   if (IS_HAL_CLIENT(comms_client)) {
+           event_notification(self, "Service stopping", "Hal has signalled that it is stopping");
+           wm_device_manager_remove_by_prop(priv->device_list, "dccm-type", "hal");
+           return;
+   }
++#endif
+ 
++#if ENABLE_ODCCM_SUPPORT
+   if (IS_ODCCM_CLIENT(comms_client)) {
+           event_notification(self, "Service stopping", "Odccm has signalled that it is stopping");
+           wm_device_manager_remove_by_prop(priv->device_list, "dccm-type", "odccm");
+           return;
+   }
++#endif
+ 
++#if ENABLE_VDCCM_SUPPORT
+   if (IS_VDCCM_CLIENT(comms_client)) {
+           event_notification(self, "Service stopping", "Vdccm has signalled that it is stopping");
+           uninit_vdccm_client_comms(self);
+           return;
+   }
++#endif
+ }
+ 
+ 
+@@ -566,32 +607,41 @@
+ {
+         SynceTrayIconPrivate *priv = SYNCE_TRAYICON_GET_PRIVATE (self);
+ 
++#if ENABLE_UDEV_SUPPORT
+         if (IS_DCCM_CLIENT(priv->udev_client)) {
+                 dccm_client_uninit_comms(priv->udev_client);
+                 g_object_unref(priv->udev_client);
+                 priv->udev_client = NULL;
+                 wm_device_manager_remove_by_prop(priv->device_list, "dccm-type", "udev");
+         }
++#endif
+ 
++#if ENABLE_HAL_SUPPORT
+         if (IS_DCCM_CLIENT(priv->hal_client)) {
+                 dccm_client_uninit_comms(priv->hal_client);
+                 g_object_unref(priv->hal_client);
+                 priv->hal_client = NULL;
+                 wm_device_manager_remove_by_prop(priv->device_list, "dccm-type", "hal");
+         }
++#endif
+ 
++#if ENABLE_ODCCM_SUPPORT
+         if (IS_DCCM_CLIENT(priv->odccm_client)) {
+                 dccm_client_uninit_comms(priv->odccm_client);
+                 g_object_unref(priv->odccm_client);
+                 priv->odccm_client = NULL;
+                 wm_device_manager_remove_by_prop(priv->device_list, "dccm-type", "odccm");
+         }
++#endif
+ 
++#if ENABLE_VDCCM_SUPPORT
+         uninit_vdccm_client_comms(self);
++#endif
+ 
+         return;
+ }
+ 
++#if ENABLE_VDCCM_SUPPORT
+ static gboolean
+ start_dccm (SynceTrayIcon *self)
+ {
+@@ -686,6 +736,7 @@
+ 
+         return;
+ }
++#endif
+ 
+ static void
+ init_client_comms(SynceTrayIcon *self)
+@@ -695,6 +746,7 @@
+ 
+         dbus_g_thread_init();
+ 
++#if ENABLE_UDEV_SUPPORT
+         comms_client = DCCM_CLIENT(g_object_new(UDEV_CLIENT_TYPE, NULL));
+ 
+         g_signal_connect (G_OBJECT (comms_client), "password-rejected",
+@@ -727,7 +779,9 @@
+         }
+ 
+         priv->udev_client = comms_client;
++#endif
+ 
++#if ENABLE_HAL_SUPPORT
+         comms_client = DCCM_CLIENT(g_object_new(HAL_CLIENT_TYPE, NULL));
+ 
+         g_signal_connect (G_OBJECT (comms_client), "password-rejected",
+@@ -760,7 +814,9 @@
+         }
+ 
+         priv->hal_client = comms_client;
++#endif
+ 
++#if ENABLE_ODCCM_SUPPORT
+         comms_client = DCCM_CLIENT(g_object_new(ODCCM_CLIENT_TYPE, NULL));
+ 
+         g_signal_connect (G_OBJECT (comms_client), "password-rejected",
+@@ -793,9 +849,11 @@
+         }
+ 
+         priv->odccm_client = comms_client;
++#endif
+ 
++#if ENABLE_VDCCM_SUPPORT
+         init_vdccm_client_comms(self);
+-
++#endif
+         return;
+ }
+ 
+@@ -933,6 +991,7 @@
+   gtk_widget_destroy (GTK_WIDGET(about));
+ }
+ 
++#if ENABLE_VDCCM_SUPPORT
+ static void
+ menu_disconnect(GtkWidget *menu_item, SynceTrayIcon *self)
+ {
+@@ -966,6 +1025,7 @@
+   sleep(1);
+   init_vdccm_client_comms(self);
+ }
++#endif
+ 
+ static void
+ menu_exit(GtkWidget *button, SynceTrayIcon *self)
+@@ -1018,11 +1078,13 @@
+                   g_signal_connect(G_OBJECT(entry), "activate", G_CALLBACK(menu_device_info), self);
+                   gtk_menu_append(GTK_MENU(device_menu), entry);
+ 
++#if ENABLE_VDCCM_SUPPORT
+                   if (gconf_client_get_bool(priv->conf_client, "/apps/synce/trayicon/enable_vdccm", NULL)) {
+                           entry = gtk_image_menu_item_new_from_stock (GTK_STOCK_DISCONNECT, NULL);
+                           g_signal_connect(G_OBJECT(entry), "activate", G_CALLBACK(menu_disconnect), self);
+                           gtk_menu_append(GTK_MENU(device_menu), entry);
+                   }
++#endif
+ 
+                   g_free(device_names_iter->data);
+                   device_names_iter = g_list_next(device_names_iter);
+@@ -1036,6 +1098,7 @@
+   entry = gtk_separator_menu_item_new();
+   gtk_menu_append(GTK_MENU(priv->menu), entry);
+ 
++#if ENABLE_VDCCM_SUPPORT
+   if (gconf_client_get_bool(priv->conf_client, "/apps/synce/trayicon/enable_vdccm", NULL)) {
+     if (dccm_is_running()) {
+       entry = gtk_menu_item_new_with_label(_("Stop DCCM"));
+@@ -1055,6 +1118,7 @@
+     entry = gtk_separator_menu_item_new();
+     gtk_menu_append(GTK_MENU(priv->menu), entry);
+   }
++#endif
+ 
+   entry = gtk_image_menu_item_new_from_stock (GTK_STOCK_PREFERENCES, NULL);
+   g_signal_connect(G_OBJECT(entry), "activate", G_CALLBACK(menu_preferences), self);
+@@ -1107,6 +1171,7 @@
+   key = gconf_entry_get_key(entry);
+   value = gconf_entry_get_value(entry);
+ 
++#if ENABLE_VDCCM_SUPPORT
+   if (!(g_ascii_strcasecmp(key, "/apps/synce/trayicon/enable_vdccm"))) {
+     gboolean enable_vdccm = gconf_value_get_bool(value);
+ 
+@@ -1117,6 +1182,7 @@
+ 
+     return;
+   }
++#endif
+ 
+   if (!(g_ascii_strcasecmp(key, "/apps/synce/trayicon/show_disconnected"))) {
+     priv->show_disconnected = gconf_value_get_bool(value);
