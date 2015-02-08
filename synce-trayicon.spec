@@ -1,32 +1,46 @@
-Summary:	SynCE tray icon for GNOME 2
-Summary(pl.UTF-8):	SynCE jako ikona tacki dla środowiska GNOME 2
+#
+# Conditional build:
+%bcond_without	appindicator	# application indicators support
+%bcond_without	vdccm		# vdccm support
+#
+Summary:	SynCE tray icon for GNOME
+Summary(pl.UTF-8):	SynCE jako ikona tacki dla środowiska GNOME
 Name:		synce-trayicon
-Version:	0.15.1
-Release:	3
-License:	MIT+LGPL
-Group:		Applications/Communications
+Version:	0.17
+Release:	1
+License:	MIT
+Group:		X11/Applications/Networking
 Source0:	http://downloads.sourceforge.net/synce/%{name}-%{version}.tar.gz
-# Source0-md5:	b6ab20a0a4814817b486585b6b63130e
-Patch0:		%{name}-libnotify.patch
-Patch1:		%{name}-backends.patch
+# Source0-md5:	0ebb11add5cf858f6334a97e3647e1e3
 URL:		http://www.synce.org/
-BuildRequires:	autoconf
+BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
 BuildRequires:	gettext-tools
+BuildRequires:	glib2-devel >= 1:2.26
+BuildRequires:	gtk+3-devel >= 3.0
 BuildRequires:	intltool
-BuildRequires:	libgnomeui-devel >= 2.0.0
-BuildRequires:	libgtop-devel >= 1:2.0.0
+%{?with_appindicator:BuildRequires:	libappindicator-gtk3-devel >= 0.0.7}
+BuildRequires:	libgnome-keyring-devel
+%{?with_vdccm:BuildRequires:	libgtop-devel >= 1:2.0.0}
 BuildRequires:	libnotify-devel >= 0.7
 BuildRequires:	libtool
+BuildRequires:	libxml2-devel >= 1:2.6.0
 BuildRequires:	perl-XML-Parser
 BuildRequires:	pkgconfig
-BuildRequires:	rpmbuild(macros) >= 1.559
-BuildRequires:	synce-librapi2-devel >= 0.15
+BuildRequires:	rpmbuild(macros) >= 1.592
+BuildRequires:	synce-core-lib-devel >= 0.17
 BuildRequires:	synce-orange-libs-devel >= 0.4-3
-BuildRequires:	synce-rra-devel >= 0.14
-%requires_ge_to synce-librapi2 synce-librapi2-devel
-%requires_ge_to	synce-rra synce-rra-devel
-Requires:	synce-connector
+BuildRequires:	synce-rra-devel >= 0.17
+Requires(post,postun):	desktop-file-utils
+Requires(post,postun):	glib2 >= 1:2.26
+Requires(post,postun):	gtk-update-icon-cache
+Requires:	glib2 >= 1:2.26
+Requires:	hicolor-icon-theme
+%{?with_appindicator:Requires:	libappindicator-gtk3 >= 0.0.7}
+Requires:	libxml2 >= 1:2.6.0
+Requires:	synce-core >= 0.17
+Requires:	synce-orange-libs >= 0.4-3
+Requires:	synce-rra >= 0.17
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -41,8 +55,6 @@ Ta aplikacja pokazuje, kiedy urządzenie jest podłączone.
 
 %prep
 %setup -q
-%patch0 -p1
-%patch1 -p2
 
 %build
 %{__libtoolize}
@@ -51,11 +63,12 @@ Ta aplikacja pokazuje, kiedy urządzenie jest podłączone.
 %{__autoheader}
 %{__automake}
 %configure \
-	--disable-schemas-install \
-	--enable-vdccm-support \
-	--enable-odccm-support \
+	%{!?with_appindicator:--disable-appindicator} \
 	--disable-hal-support \
-	--enable-udev-support
+	--enable-odccm-support \
+	--disable-schemas-install \
+	--enable-udev-support \
+	%{?with_vdccm:--enable-vdccm-support}
 
 %{__make}
 
@@ -65,38 +78,41 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-%find_lang %{name} --with-gnome
+%find_lang %{name}
 
-rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/modules/*.la
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/%{name}/modules/*.la
 
 install -d $RPM_BUILD_ROOT/etc/xdg/autostart
-mv $RPM_BUILD_ROOT{%{_datadir}/gnome/autostart,/etc/xdg/autostart}/%{name}-autostart.desktop
+%{__mv} $RPM_BUILD_ROOT{%{_datadir}/gnome/autostart,/etc/xdg/autostart}/%{name}-autostart.desktop
+rmdir $RPM_BUILD_ROOT%{_datadir}/gnome/autostart
+rmdir $RPM_BUILD_ROOT%{_datadir}/gnome
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %post
-%gconf_schema_install %{name}.schemas
-%scrollkeeper_update_post
+%glib_compile_schemas
 %update_desktop_database_post
+%update_icon_cache hicolor
 
 %postun
-%scrollkeeper_update_postun
-
-%preun
-%gconf_schema_uninstall %{name}.schemas
+%glib_compile_schemas
+%update_desktop_database_postun
+%update_icon_cache hicolor
 
 %files -f %{name}.lang
 %defattr(644,root,root,755)
-%doc AUTHORS ChangeLog README
-%attr(755,root,root) %{_bindir}/*
-%dir %{_datadir}/synce
-%{_datadir}/synce/*.glade
-%{_sysconfdir}/gconf/schemas/%{name}.schemas
+%doc AUTHORS COPYING ChangeLog README
+%attr(755,root,root) %{_bindir}/synce-trayicon
 %dir %{_libdir}/%{name}
 %dir %{_libdir}/%{name}/modules
 %attr(755,root,root) %{_libdir}/%{name}/modules/*.so
-%{_iconsdir}/hicolor/*/apps/synce-*.png
-%{_mandir}/man1/%{name}.1*
+# dir shared among some synce-* apps
+%dir %{_datadir}/synce
+%{_datadir}/synce/synce_trayicon_properties.glade
+%{_datadir}/glib-2.0/schemas/org.synce.SynceTrayicon.gschema.xml
 %{_desktopdir}/%{name}.desktop
+%{_iconsdir}/hicolor/*/apps/synce-color.png
+%{_iconsdir}/hicolor/*/apps/synce-gray.png
+%{_mandir}/man1/%{name}.1*
 /etc/xdg/autostart/%{name}-autostart.desktop
