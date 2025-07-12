@@ -7,7 +7,7 @@ Summary:	SynCE tray icon for GNOME
 Summary(pl.UTF-8):	SynCE jako ikona tacki dla środowiska GNOME
 Name:		synce-trayicon
 Version:	0.17
-Release:	2
+Release:	3
 License:	MIT
 Group:		X11/Applications/Networking
 Source0:	http://downloads.sourceforge.net/synce/%{name}-%{version}.tar.gz
